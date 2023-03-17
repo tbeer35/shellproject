@@ -12,7 +12,7 @@ void end();
 void handleSigInt(int sig);
 int handleLS(int wordNum, char *words[], int curWord, bool pipe);
 int handleCD(int wordNum, char *words[]);
-int handleDog();
+int handleDog(int wordNum, char *words[]);
 void handlePWD();
 void parseInput();
 //main starts the program, creates an int and char** for later use, calls parse input
@@ -176,72 +176,74 @@ int handleLS(int wordNum, char *words[], int curWord, bool pipe) {
 
 int handleCD(int wordNum, char *words[]) {
 
-   // chack to see if number of arguments is right
-   if (wordNum != 2) {
-     printf("Please format it as: %s <directory>\n", words[0]);
-     exit(EXIT_FAILURE);
-   }
-   // attempt to change directory to the given argument
-   if (chdir(words[1]) == -1) {
-      printf("no %s directory found\n", words[1]);
-      exit(EXIT_FAILURE);
-   }
+	for (int z = 0; z < wordNum-1; z++) {
+		if (strcmp(words[z+1], "..") == 0) {
+		      	chdir("..");
+                        char *cwd = getcwd(NULL, 0);
+                        printf("Current working directory: %s\n", cwd);
+                        free(cwd);
+			//break;
+		} else if (strcmp(words[z+1], ".") == 0) {
+		      	char *cwd = getcwd(NULL, 0);
+                   	printf("Current working directory: %s\n", cwd);
+                   	free(cwd);
+			//break;
+		} else if (strcmp(words[z+1], "&") == 0) {
+			//Run process as background
+                	int bgProcess = fork();
+                	printf("%d running in background\n", &bgProcess);
+			//break; 
+		} else if (strcmp(words[z+1], "|") == 0) {
+                	//Run pipe command
+			//break;
+            	} else if (chdir(words[z+1]) == -1) {
+              		printf("No matching directory found\n");
+                      	//exit(EXIT_FAILURE);
+			//break;
+                } 
 
-   if (words[1] == "..") {
-      chdir("..");
-   }else{
-      chdir(words[1]);
-   }
+	}
+	return 0;
+}		
 
-   // print the new current working directory
-   char *cwd = getcwd(NULL, 0);
-   printf("Current working directory: %s\n", cwd);
-   free(cwd);
 
-   return 0;
-}
-
-int handleDog() {
+int handleDog(int wordNum, char *words[]) {
     char filename[100];
     char text[100];
     FILE *file_ptr;
 
-    printf("Enter file name: ");
-    scanf("%s", filename);
+    for (int z = 0; z < wordNum-1; z++) {
+	if (strcmp(words[z+1], "&") == 1 && strcmp(words[z+1], "|") == 1) {
+            printf("Enter file name: ");
+	    fgets(filename, sizeof(filename), stdin);
+            filename[strcspn(filename, "\n")] = '\0'; // Remove trailing newline
 
-    file_ptr = fopen(filename, "w"); // open/create file in write mode
+    	    file_ptr = fopen(filename, "w"); // open/create file in write mode
 
-    if (file_ptr == NULL) { // check if file was opened successfully
-        printf("Error opening file.");
-        return 1;
+    	    if (file_ptr == NULL) { // check if file was opened successfully
+                printf("Error opening file.");
+                return 1;
+    	    }
+            fclose(file_ptr); // close file
+        } else if (strcmp(words[z+1], "&") == 0) {
+	    int bgProcess = fork();
+	    if (bgProcess == -1) {
+                printf("Error forking process: %s\n", strerror(errno));
+            } else if (bgProcess == 0) {
+                // Child process
+                handleDog(z, words);
+                exit(0);
+            } else {
+                // Parent process
+                printf("%d running in background\n", bgProcess);
+            }
+	} else if (strcmp(words[z+1], "|") == 0) {
+	    //pipe
+	}
+        return 0;
     }
-//    printf("What would you like to write in the file: ");
-//    char buf[100]; // buffer for line
-//    char whitespace[] = " \t\r\n\v";
-//    char *words_on_line[10]; // 10 words on a line
-//    int stop = 0;
-//    fgets(buf, 100, stdin);
-//    char *s = buf;
-//   char *end_buf = buf + strlen(buf);
-//    int eol = 0, i = 0;
-//    while (1) {
-//	while (s < end_buf && strchr(whitespace, *s))
-//   		s++;
-//    	if (*s == 0) // eol - done
-//	        break;
-//	words_on_line[i++] = s;
-//	while (s < end_buf && !strchr(whitespace, *s))
-//		s++;
-//	*s = 0;
-//    }
-//    for(int x = 0; x < i; i++){
-//    	fprintf(file_ptr, "%s ",words_on_line[x]); // write to file
-//    }
-    
-    fclose(file_ptr); // close file
-
-    return 0;
 }
+
 
 void handlePWD() {
 
