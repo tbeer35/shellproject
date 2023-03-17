@@ -35,7 +35,10 @@ void executeInput(char *words[], int wordNum){
                 	handleDog();
 		}else if(strcmp(words[x], "pwd")==0){
 			handlePWD();
-		}
+//		}else if(strcmp(words[x], "&")==0){
+//                      handlebgp();
+                }
+
 		x++;
         if (strcmp(words[0],"stop") == 0)
                      exit(-1);
@@ -85,31 +88,46 @@ void end(){
 int handleLS(int wordNum, char *words[]) {
     DIR *dir;
     struct dirent *ent;
+	int y = 0;
+	while (y < wordNum) {     
+	    for (int z = 0; z < 10; z++) {
+		if (words[y] != "&" || words[y] < 10){
 
-    // Open the current directory or a chosen directory as an argument
-    if (wordNum == 1) {
-        dir = opendir(".");
-    } else if (wordNum == 2) {
-        dir = opendir(words[1]);
-    } else {
-        printf("Usage: ls [dir]\n");
-        exit(1);
-    }
-    // if no directory it throws the error message
-    if (dir == NULL) {
-        printf("Error: Cannot open directory\n");
-        exit(1);
-    }
+		// Open the current directory or a chosen directory as an argument
+		if (wordNum == 1) {
+		    dir = opendir(".");
+		} else if (wordNum == 2) {
+		    dir = opendir(words[1]);
+		} else {
+		    printf("Usage: ls [dir]\n");
+		    exit(1);
+		}
+		// if no directory it throws the error message
+		if (dir == NULL) {
+		    printf("Error: Cannot open directory\n");
+		    exit(1);
+		}
 
-    // Loop through all the entries in the directory
-    while ((ent = readdir(dir)) != NULL) {
-        printf("%s\n", ent->d_name);
-    }
+		// Loop through all the entries in the directory
+		while ((ent = readdir(dir)) != NULL) {
+		    printf("%s\n", ent->d_name);
+		}
 
-    // Close the directory
-    closedir(dir);
+		// Close the directory
+		closedir(dir);
 
-    return 0;
+		return 0;
+	    } else if (words[y] == "&") {
+		//Run process as background
+		int bgProcess = fork();
+		printf("%s running in background", &bgProcess);	
+	    } else if (words[y] == "|") {
+		//Run pipe command
+
+	    }
+	y++;
+	}
+	}
 }
 
 int handleCD(int wordNum, char *words[]) {
@@ -187,5 +205,9 @@ void handlePWD() {
    char *cwd = getcwd(NULL, 0);
    printf("Current working directory: %s\n", cwd);
    free(cwd);
+
+}
+
+int handlebgp() {
 
 }
