@@ -8,6 +8,9 @@
 
 void end();
 void handleSigInt(int sig);
+int handleLS(int wordNum, char *words[]);
+int handleCD(int wordNum, char *words[]);
+int handleDog();
 int main(int argc, char **argv) {
         printf("welcome to the shell, enjoy your stay\n");
         parseInput(argc, &argv);
@@ -20,9 +23,9 @@ void executeInput(char *words[], int wordNum){
                 if(strcmp(words[x], "exit")==0){
                         end();
                 }else if(strcmp(words[x], "ls")==0){
-			handleLS();
+			handleLS(wordNum, words);
                 }else if(strcmp(words[x], "cd")==0){
-			handleCD();
+			handleCD(wordNum, words);
 		}else if(strcmp(words[x], "dog")==0){
                 	handleDog();
 		}
@@ -66,15 +69,15 @@ void end(){
         exit(-1);
 }
 
-int handleLS(int argc, char *argv[]) {
+int handleLS(int wordNum, char *words[]) {
     DIR *dir;
     struct dirent *ent;
 
     // Open the current directory or a chosen directory as an argument
-    if (argc == 1) {
+    if (wordNum == 1) {
         dir = opendir(".");
-    } else if (argc == 2) {
-        dir = opendir(argv[1]);
+    } else if (wordNum == 2) {
+        dir = opendir(words[1]);
     } else {
         printf("Usage: ls [dir]\n");
         exit(1);
@@ -96,23 +99,23 @@ int handleLS(int argc, char *argv[]) {
     return 0;
 }
 
-int handleCD(int argc, char *argv[]) {
+int handleCD(int wordNum, char *words[]) {
 
    // chack to see if number of arguments is right
-   if (argc != 2) {
-     printf("Please format it as: %s <directory>\n", argv[0]);
+   if (wordNum != 2) {
+     printf("Please format it as: %s <directory>\n", words[0]);
      exit(EXIT_FAILURE);
    }
    // attempt to change directory to the given argument
-   if (chdir(argv[1]) == -1) {
-      printf("no %s directory found\n", argv[1]);
+   if (chdir(words[1]) == -1) {
+      printf("no %s directory found\n", words[1]);
       exit(EXIT_FAILURE);
    }
 
-   if (argv[1] == "..") {
+   if (words[1] == "..") {
       chdir("..");
    }else{
-      chdir(argv[1]);
+      chdir(words[1]);
    }
 
    // print the new current working directory
