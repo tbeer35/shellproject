@@ -11,6 +11,8 @@ void handleSigInt(int sig);
 int handleLS(int wordNum, char *words[]);
 int handleCD(int wordNum, char *words[]);
 int handleDog();
+void handlePWD();
+void parseInput();
 int main(int argc, char **argv) {
         printf("welcome to the shell, enjoy your stay\n");
         parseInput(argc, &argv);
@@ -28,6 +30,8 @@ void executeInput(char *words[], int wordNum){
 			handleCD(wordNum, words);
 		}else if(strcmp(words[x], "dog")==0){
                 	handleDog();
+		}else if(strcmp(words[x], "pwd")==0){
+			handlePWD();
 		}
 		x++;
         if (strcmp(words[0],"stop") == 0)
@@ -168,3 +172,11 @@ int handleDog() {
     return 0;
 }
 
+void handlePWD() {
+
+   // print the new current working directory
+   char *cwd = getcwd(NULL, 0);
+   printf("Current working directory: %s\n", cwd);
+   free(cwd);
+
+}
