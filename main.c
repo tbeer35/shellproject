@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <dirent.h>
 
+//declare all functions we use later
 void end();
 void handleSigInt(int sig);
 int handleLS(int wordNum, char *words[]);
@@ -13,14 +14,16 @@ int handleCD(int wordNum, char *words[]);
 int handleDog();
 void handlePWD();
 void parseInput();
+//main starts the program, creates an int and char** for later use, calls parse input
 int main(int argc, char **argv) {
         printf("welcome to the shell, enjoy your stay\n");
         parseInput(argc, &argv);
 }
 
+//takes in the input in a char** and how much there is and calls various other functions to handle each one
 void executeInput(char *words[], int wordNum){
-        int x = 0;
-        for (int j = 0; j < wordNum; j++)
+	int x =0;
+        for (int j = 0; j < wordNum; j++) //loop over all input
                 printf("words[%d]: %s\n", j, words[j]);
                 if(strcmp(words[x], "exit")==0){
                         end();
@@ -38,33 +41,39 @@ void executeInput(char *words[], int wordNum){
                      exit(-1);
 }
 
+//takes in a int and char** as input, loops until the shell is killed
+//takes in input, cleans whitespace, calls an execute input function
 void parseInput(int argc, char** argv) {
+    //declare variables
     char buf[100]; // buffer for line
     char whitespace[] = " \t\r\n\v";
     char *words_on_line[10]; // 10 words on a line
     int stop = 0;
-    signal(SIGINT, handleSigInt);
-    if (fgets(buf, 100, stdin) == NULL && feof(stdin)){
-        end();
+    while(1){ //loop until the shell is killed
+    	signal(SIGINT, handleSigInt); //catch ctrl-C
+    	if (fgets(buf, 100, stdin) == NULL && feof(stdin)){ //catch ctrl-D
+        	end(); //call end
+    	}
+    	char *s = buf;
+    	char *end_buf = buf + strlen(buf);
+    	int eol = 0, i = 0;
+    	while (1) { //clear whitespace and put input into a char** and the amount of input into an int
+        	while (s < end_buf && strchr(whitespace, *s))
+                	s++;
+        	if (*s == 0) // eol - done
+                 	break;
+        	words_on_line[i++] = s;
+        	while (s < end_buf && !strchr(whitespace, *s))
+             	s++;
+        	*s = 0;
+    	}
+	//then call executeInput giving it the input and how much there is
+    	executeInput(words_on_line, i);
+    	//for (int j = 0; j < i; j++)
+          //  	printf("words_on_line[%d]: %s\n", j, words_on_line[j]);
+    	//if (strcmp(words_on_line[0],"stop") == 0)
+         //	exit(-1);
     }
-    char *s = buf;
-    char *end_buf = buf + strlen(buf);
-    int eol = 0, i = 0;
-    while (1) {
-        while (s < end_buf && strchr(whitespace, *s))
-                s++;
-        if (*s == 0) // eol - done
-                 break;
-        words_on_line[i++] = s;
-        while (s < end_buf && !strchr(whitespace, *s))
-             s++;
-        *s = 0;
-    }
-    executeInput(words_on_line, i);
-    for (int j = 0; j < i; j++)
-            printf("words_on_line[%d]: %s\n", j, words_on_line[j]);
-    if (strcmp(words_on_line[0],"stop") == 0)
-         exit(-1);
 }
 void handleSigInt(int sig){
         printf("caught signal %d\n", sig);
