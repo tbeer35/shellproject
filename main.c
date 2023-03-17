@@ -34,7 +34,7 @@ void executeInput(char *words[], int wordNum, bool pipe){
                 }else if(strcmp(words[x], "cd")==0){
 			handleCD(wordNum, words);
 		}else if(strcmp(words[x], "dog")==0){
-                	handleDog();
+                	handleDog(wordNum, words);
 		}else if(strcmp(words[x], "pwd")==0){
 			handlePWD();
 //		}else if(strcmp(words[x], "&")==0){
@@ -211,9 +211,10 @@ int handleDog(int wordNum, char *words[]) {
     char filename[100];
     char text[100];
     FILE *file_ptr;
-
-    for (int z = 0; z < wordNum-1; z++) {
-	if (strcmp(words[z+1], "&") == 1 && strcmp(words[z+1], "|") == 1) {
+	printf("in dog\n");
+    for (int z = 0; z <= wordNum; z++) {
+	if (strcmp(words[z+1], "&") != 0 && strcmp(words[z+1], "|") != 0) {
+		printf("in dog if\n");
             printf("Enter file name: ");
 	    fgets(filename, sizeof(filename), stdin);
             filename[strcspn(filename, "\n")] = '\0'; // Remove trailing newline
@@ -238,6 +239,7 @@ int handleDog(int wordNum, char *words[]) {
                 printf("%d running in background\n", bgProcess);
             }
 	} else if (strcmp(words[z+1], "|") == 0) {
+		printf("in the pipe area");
 	    //pipe
 	}
         return 0;
