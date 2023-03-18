@@ -80,30 +80,25 @@ void parseInput(int argc, char** argv) {
 		}
 	}
     	executeInput(words_on_line, i, pipe);
-    	//for (int j = 0; j < i; j++)
-          //  	printf("words_on_line[%d]: %s\n", j, words_on_line[j]);
-    	//if (strcmp(words_on_line[0],"stop") == 0)
-         //	exit(-1);
     }
 }
+//catch ctrl-c and do nothing with it
 void handleSigInt(int sig){
         printf("caught signal %d\n", sig);
 }
+//end the program
 void end(){
+	printf("you hit ctrl-D to exit\n");
         exit(-1);
 }
 
+//takes in wordnum, the array of words, the current word, and if there's a pipe or not, processes ls with or without a pipe and returns
 int handleLS(int wordNum, char *words[], int curWord, bool pipe) {
-    printf("curWord is %d\n", curWord);
     DIR *dir;
     struct dirent *ent;
 	int startWord = curWord;	
-	    //for (int z = 0; z < 10; z++) {
 	while(curWord <= wordNum){
-		printf("in the while\n");
 	   if (words[curWord] != "&" && pipe == false|| words[curWord] <= wordNum && pipe == false){
-		   printf("in the if\n");
-
 		// Open the current directory or a chosen directory as an argument
 		if (wordNum == 1 || strcmp(words[curWord+1], "")) {
 		    dir = opendir(".");
@@ -129,19 +124,15 @@ int handleLS(int wordNum, char *words[], int curWord, bool pipe) {
 		return 0;
 	    } else if (words[curWord] == "&" && pipe == false) {
 		//Run process as background
-		printf("in the else if\n");
 		int bgProcess = fork();
 		printf("%s running in background", &bgProcess);	
 	    } else if (pipe == true) {
-		//Run pipe command
+		//creates a child process to run the first half of the pipe
 		if(fork() == 0){
-			printf("in child, curWord is %d\n", curWord);
 			//child calls LS
 			if (strcmp(words[curWord+1],"") == 0 || strcmp(words[curWord+1],"|")==0) {
-		                printf("in the first if\n");
 				dir = opendir(".");
                         } else if (strcmp(words[curWord+2],"") == 0 || strcmp(words[curWord+2],"|")==0) {
-				printf("in the second if\n");
 				dir = opendir(words[startWord+1]);
 	                } else {
  	                        printf("Usage: ls [dir]\n");
@@ -163,20 +154,17 @@ int handleLS(int wordNum, char *words[], int curWord, bool pipe) {
 			
 		}else{
 			//parent calls whatever it needs to
-			printf("in parent");
 			return curWord;
 		}
 
 
 	    }
-	printf("about to iterate curWord\n");
 	curWord++;
 	}
 }
-
+//takes in word num and the array of words, processes user input to call the cd command with a default and other options
 int handleCD(int wordNum, char *words[]) {
-
-	for (int z = 0; z < wordNum-1; z++) {
+	for (int z = 0; z =< wordNum-1; z++) { //loop through input
 		if (strcmp(words[z+1], "..") == 0) {
 		      	chdir("..");
                         char *cwd = getcwd(NULL, 0);
@@ -206,15 +194,13 @@ int handleCD(int wordNum, char *words[]) {
 	return 0;
 }		
 
-
+//takes in wordnum and array of words, asks the user what they want to call their file and creates it before returning
 int handleDog(int wordNum, char *words[]) {
     char filename[100];
     char text[100];
     FILE *file_ptr;
-	printf("in dog\n");
     for (int z = 0; z <= wordNum; z++) {
 	if (strcmp(words[z+1], "&") != 0 && strcmp(words[z+1], "|") != 0) {
-		printf("in dog if\n");
             printf("Enter file name: ");
 	    fgets(filename, sizeof(filename), stdin);
             filename[strcspn(filename, "\n")] = '\0'; // Remove trailing newline
@@ -239,7 +225,6 @@ int handleDog(int wordNum, char *words[]) {
                 printf("%d running in background\n", bgProcess);
             }
 	} else if (strcmp(words[z+1], "|") == 0) {
-		printf("in the pipe area");
 	    //pipe
 	}
         return 0;
